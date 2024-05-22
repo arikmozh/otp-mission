@@ -44,7 +44,7 @@ otp-mission/
 
 ### Backend
 
-1. **Navigate to the server directory:**
+1. Navigate to the server directory:
 
    ```bash
    cd otp-mission/server
@@ -71,7 +71,7 @@ otp-mission/
 
 ### Frontend
 
-1. **Navigate to the client directory:**
+1. Navigate to the client directory:
 
    ```bash
    cd otp-mission/client
