@@ -116,6 +116,11 @@ const OtpForm: React.FC = () => {
                   onChange={(e) => setOtp(e.target.value)}
                   maxLength={6}
                   required
+                  onKeyPress={(e) => {
+                    if (!/[0-9]/.test(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
                 />
               </div>
               <button type="submit">Verify OTP</button>
