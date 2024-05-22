@@ -1,4 +1,3 @@
-// src/controllers/otpController.js
 const User = require('../models/user-model');
 const nodemailer = require('nodemailer');
 const axios = require('axios');
@@ -19,7 +18,7 @@ const generateOTP = async () => {
   return otp;
 };
 
-// // Send OTP email
+// Send OTP email
 const sendOTPEmail = async (email, otp) => {
   const transporter = nodemailer.createTransport({
     service: 'Gmail',
@@ -39,34 +38,7 @@ const sendOTPEmail = async (email, otp) => {
   await transporter.sendMail(mailOptions);
 };
 
-// // Handle OTP request
-// exports.sendOTP = async (req, res) => {
-//   const { email } = req.body;
-//   const otp = await generateOTP();
-//   const otpExpires = new Date(Date.now() + 5 * 60000); // 5 minutes
-
-//   let user = await User.findOne({ email });
-//   if (user) {
-//     user.otp = otp;
-//     user.otpExpires = otpExpires;
-//   } else {
-//     user = new User({ email, otp, otpExpires });
-//   }
-
-//   await user.save();
-//   await sendOTPEmail(email, otp);
-
-//   setTimeout(async () => {
-//     user.otp = '';
-//     await user.save();
-//   }, 5 * 60000); // 5 minutes
-
-
-//   res.status(200).json({ message: 'OTP sent to email' });
-//   // res.status(200).json({ message: email });
-// };
-
-// Helper function to generate, save, and send OTP
+// Helper function to generate save and send OTP
 const generateAndSendOTP = async (email) => {
   const otp = await generateOTP();
   const otpExpires = new Date(Date.now() + 5 * 60000); // 5 minutes
@@ -102,8 +74,6 @@ exports.resendOTP = async (req, res) => {
   await generateAndSendOTP(email);
   res.status(200).json({ message: 'OTP resent to email' });
 };
-
-
 
 // Handle OTP verification
 exports.verifyOTP = async (req, res) => {

@@ -1,6 +1,6 @@
 import React, { useState, FormEvent } from "react";
 import axios from "axios";
-import "../App.css"; // Import the CSS file
+import "../App.css";
 
 const OtpForm: React.FC = () => {
   const [email, setEmail] = useState<string>("");
@@ -8,15 +8,16 @@ const OtpForm: React.FC = () => {
   const [message, setMessage] = useState<string>("");
   const [messageColor, setMessageColor] = useState<string>("white");
   const [isOtpSent, setIsOtpSent] = useState<boolean>(false);
-  const [verifyError, setVerifyError] = useState<boolean>(false); // State to track verification error
-  const [isVerified, setIsVerified] = useState<boolean>(false); // State to track verification success
-  const [isLoading, setIsLoading] = useState<boolean>(false); // State to track loading
+  const [verifyError, setVerifyError] = useState<boolean>(false); // Verification error State
+  const [isVerified, setIsVerified] = useState<boolean>(false); // Verification success State
+  const [isLoading, setIsLoading] = useState<boolean>(false); // Loading State
+  const apiUrl = "https://otp-mission-server-ohk9.vercel.app/api";
 
   const handleSendOtp = async (e: FormEvent) => {
     e.preventDefault();
-    setIsLoading(true); // Set loading state to true
+    setIsLoading(true);
     try {
-      const response = await axios.post("http://localhost:8000/api/send-otp", {
+      const response = await axios.post(`${apiUrl}/send-otp`, {
         email,
       });
       setMessageColor("white");
@@ -32,12 +33,9 @@ const OtpForm: React.FC = () => {
 
   const handleVerifyOtp = async (e: FormEvent) => {
     e.preventDefault();
-    setIsLoading(true); // Set loading state to true
+    setIsLoading(true);
     try {
-      const response = await axios.post(
-        "http://localhost:8000/api/verify-otp",
-        { email, otp }
-      );
+      const response = await axios.post(`${apiUrl}/verify-otp`, { email, otp });
       setMessageColor("white");
       setMessage(response.data.message);
       setVerifyError(false); // Reset verify error if successful
@@ -52,19 +50,16 @@ const OtpForm: React.FC = () => {
   };
 
   const handleResendOtp = async () => {
-    setIsLoading(true); // Set loading state to true
+    setIsLoading(true);
     try {
-      const response = await axios.post(
-        "http://localhost:8000/api/resend-otp",
-        { email }
-      );
+      const response = await axios.post(`${apiUrl}/resend-otp`, { email });
       setMessage(response.data.message);
       setMessageColor("white");
-      setVerifyError(false); // Reset verify error
+      setVerifyError(false);
     } catch (error) {
       setMessage("Error resending OTP");
     } finally {
-      setIsLoading(false); // Set loading state to false
+      setIsLoading(false);
     }
   };
 
