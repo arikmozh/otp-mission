@@ -15,7 +15,7 @@ This project is a demonstration of an OTP (One-Time Password) generator and veri
 
 ## Live Demo
 
-You can check out the live demo of the client application [here]([https://pages.github.com](https://otp-mission-client-xd92.vercel.app))..
+You can check out the live demo of the client application [here](https://otp-mission-client-xd92.vercel.app)..
 
 
 ## Project Structure
