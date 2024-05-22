@@ -2,13 +2,21 @@
 
 This project is a demonstration of an OTP (One-Time Password) generator and verification system built using Node.js for the backend and React with Vite for the frontend. The backend sends OTPs to users via email, and the frontend allows users to request and verify OTPs.
 
+
+
 ## Table of Contents
 
+- [Live Demo](#live-demo)
 - [Project Structure](#project-structure)
 - [Setup and Installation](#setup-and-installation)
   - [Backend](#backend)
   - [Frontend](#frontend)
 - [Running Tests](#running-tests)
+
+## Live Demo
+
+You can check out the live demo of the client application [here]([https://pages.github.com](https://otp-mission-client-xd92.vercel.app))..
+
 
 ## Project Structure
 
