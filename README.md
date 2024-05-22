@@ -9,10 +9,6 @@ This project is a demonstration of an OTP (One-Time Password) generator and veri
   - [Backend](#backend)
   - [Frontend](#frontend)
 - [Running Tests](#running-tests)
-- [Deployment](#deployment)
-  - [Deploying Backend to Vercel](#deploying-backend-to-vercel)
-  - [Deploying Frontend to Vercel](#deploying-frontend-to-vercel)
-- [Environment Variables](#environment-variables)
 
 ## Project Structure
 
