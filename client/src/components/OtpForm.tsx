@@ -11,7 +11,7 @@ const OtpForm: React.FC = () => {
   const [verifyError, setVerifyError] = useState<boolean>(false); // Verification error State
   const [isVerified, setIsVerified] = useState<boolean>(false); // Verification success State
   const [isLoading, setIsLoading] = useState<boolean>(false); // Loading State
-  const apiUrl = "https://otp-mission-server-ohk9.vercel.app/api";
+  const apiUrl = "http://localhost:8000/api";
 
   const handleSendOtp = async (e: FormEvent) => {
     e.preventDefault();
@@ -114,6 +114,7 @@ const OtpForm: React.FC = () => {
                   placeholder="Enter the OTP"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
+                  maxLength={6}
                   required
                 />
               </div>
