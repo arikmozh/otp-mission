@@ -1,6 +1,10 @@
 import React, { useState, FormEvent } from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import "../App.css";
+import EmailForm from "./EmailForm";
+import OtpFormComponent from "./OtpFormComponent";
+import Notification from "./Notification";
+import Spinner from "./Spinner";
 
 const OtpForm: React.FC = () => {
   const [email, setEmail] = useState<string>("");
@@ -13,54 +17,50 @@ const OtpForm: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false); // Loading State
   const apiUrl = "http://localhost:8000/api";
 
-  const handleSendOtp = async (e: FormEvent) => {
-    e.preventDefault();
+  const handleRequest = async (
+    url: string,
+    data: object,
+    successCallback: () => void
+  ) => {
     setIsLoading(true);
     try {
-      const response = await axios.post(`${apiUrl}/send-otp`, {
-        email,
-      });
+      const response = await axios.post(url, data);
       setMessageColor("white");
       setMessage(response.data.message);
-      setIsOtpSent(true);
-      setVerifyError(false); // Reset verify error
+      successCallback();
     } catch (error) {
-      setMessage("Error sending OTP");
-    } finally {
-      setIsLoading(false); // Set loading state to false
-    }
-  };
-
-  const handleVerifyOtp = async (e: FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    try {
-      const response = await axios.post(`${apiUrl}/verify-otp`, { email, otp });
-      setMessageColor("white");
-      setMessage(response.data.message);
-      setVerifyError(false); // Reset verify error if successful
-      setIsVerified(true); // Set verified state
-    } catch (error) {
-      setMessage("Error verifying OTP");
+      if (axios.isAxiosError(error)) {
+        setMessage(error.response?.data?.message || "An error occurred");
+      } else {
+        setMessage("An unexpected error occurred");
+      }
       setMessageColor("red");
-      setVerifyError(true); // Set verify error on failure
-    } finally {
-      setIsLoading(false); // Set loading state to false
-    }
-  };
-
-  const handleResendOtp = async () => {
-    setIsLoading(true);
-    try {
-      const response = await axios.post(`${apiUrl}/resend-otp`, { email });
-      setMessage(response.data.message);
-      setMessageColor("white");
-      setVerifyError(false);
-    } catch (error) {
-      setMessage("Error resending OTP");
+      setVerifyError(true);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSendOtp = (e: FormEvent) => {
+    e.preventDefault();
+    handleRequest(`${apiUrl}/send-otp`, { email }, () => {
+      setIsOtpSent(true);
+      setVerifyError(false);
+    });
+  };
+
+  const handleVerifyOtp = (e: FormEvent) => {
+    e.preventDefault();
+    handleRequest(`${apiUrl}/verify-otp`, { email, otp }, () => {
+      setVerifyError(false);
+      setIsVerified(true);
+    });
+  };
+
+  const handleResendOtp = () => {
+    handleRequest(`${apiUrl}/resend-otp`, { email }, () => {
+      setVerifyError(false);
+    });
   };
 
   const handleResetForm = () => {
@@ -75,72 +75,34 @@ const OtpForm: React.FC = () => {
 
   return (
     <div className="container">
-      {!isLoading ? <h1>OTP GENERATOR</h1> : ""}
+      {!isLoading && <h1>OTP GENERATOR</h1>}
       <div className="form-wrapper">
         {isLoading ? (
-          <div className="spinner"></div>
+          <Spinner />
         ) : !isOtpSent ? (
-          <form onSubmit={handleSendOtp}>
-            <div>
-              <input
-                type="email"
-                id="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <button type="submit">Send OTP</button>
-          </form>
+          <EmailForm
+            email={email}
+            setEmail={setEmail}
+            handleSendOtp={handleSendOtp}
+          />
         ) : isVerified ? (
-          <div style={{ textAlign: "center" }}>
-            <span style={{ color: "green", fontWeight: "bold" }}>
-              Your email <span style={{ color: "#4f46e5" }}>{email}</span> has
-              been successfully verified!
-            </span>
-
-            <button onClick={handleResetForm} className="reset">
-              Verify Another Email
-            </button>
-          </div>
+          <Notification
+            message={message}
+            color={messageColor}
+            email={email}
+            handleResetForm={handleResetForm}
+          />
         ) : (
-          <div>
-            <form onSubmit={handleVerifyOtp}>
-              <div>
-                <input
-                  type="text"
-                  id="otp"
-                  placeholder="Enter the OTP"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  maxLength={6}
-                  required
-                  onKeyPress={(e) => {
-                    if (!/[0-9]/.test(e.key)) {
-                      e.preventDefault();
-                    }
-                  }}
-                />
-              </div>
-              <button type="submit">Verify OTP</button>
-            </form>
-            {verifyError && (
-              <button onClick={handleResendOtp} className="resend">
-                Resend OTP
-              </button>
-            )}
-          </div>
+          <OtpFormComponent
+            otp={otp}
+            setOtp={setOtp}
+            handleVerifyOtp={handleVerifyOtp}
+            handleResendOtp={handleResendOtp}
+            verifyError={verifyError}
+          />
         )}
-        {message && (
-          <p
-            className="message"
-            style={{
-              color: messageColor,
-            }}
-          >
-            {message}
-          </p>
+        {message && !isVerified && !isLoading && (
+          <Notification message={message} color={messageColor} />
         )}
       </div>
     </div>

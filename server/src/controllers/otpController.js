@@ -11,6 +11,7 @@ const generateOTP = async () => {
       axios.get(`https://api.weatherapi.com/v1/current.json?key=${WEATHER_API_KEY}&q=${city}&aqi=no`)
     )
   );
+
   const otp = temps.map(temp => {
     const temperature = Math.abs(Math.round(temp.data.current.temp_c));
     return temperature < 10 ? `0${temperature}` : `${temperature}`;
@@ -64,38 +65,53 @@ const generateAndSendOTP = async (email) => {
 // Handle OTP request
 exports.sendOTP = async (req, res) => {
   const { email } = req.body;
-  await generateAndSendOTP(email);
-  res.status(200).json({ message: 'OTP sent to email' });
+  try {
+    await generateAndSendOTP(email);
+    res.status(200).json({ message: 'OTP sent to email' });
+  } catch (error) {
+    console.error('Error sending OTP:', error);
+    res.status(500).json({ message: 'Failed to send OTP', error: error.message });
+  }
 };
 
 // Handle resending OTP
 exports.resendOTP = async (req, res) => {
   const { email } = req.body;
-  await generateAndSendOTP(email);
-  res.status(200).json({ message: 'OTP resent to email' });
+  try {
+    await generateAndSendOTP(email);
+    res.status(200).json({ message: 'OTP sent to email' });
+  } catch (error) {
+    console.error('Error sending OTP:', error);
+    res.status(500).json({ message: 'Failed to send OTP', error: error.message });
+  }
 };
 
 // Handle OTP verification
 exports.verifyOTP = async (req, res) => {
   const { email, otp } = req.body;
 
-  let user = await User.findOne({ email });
+  try {
+    let user = await User.findOne({ email });
 
-  if (!user) {
-    return res.status(404).json({ message: 'User not found' });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const now = new Date();
+    if (now > user.otpExpires) {
+      return res.status(400).json({ message: 'OTP expired' });
+    }
+
+    if (user.otp !== otp) {
+      return res.status(400).json({ message: 'Invalid OTP' });
+    }
+
+    user.otp = '';
+    await user.save();
+
+    res.status(200).json({ message: 'OTP verified successfully' });
+  } catch (error) {
+    console.error('Error verifying OTP:', error);
+    res.status(500).json({ message: 'An error occurred while verifying OTP', error: error.message });
   }
-
-  if (user.otp !== otp) {
-    return res.status(400).json({ message: 'Invalid OTP' });
-  }
-
-  const now = new Date();
-  if (now > user.otpExpires) {
-    return res.status(400).json({ message: 'OTP expired' });
-  }
-
-  user.otp = '';
-  await user.save();
-
-  res.status(200).json({ message: 'OTP verified successfully' });
 };

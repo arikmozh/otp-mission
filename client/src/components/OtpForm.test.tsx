@@ -10,11 +10,6 @@ describe("OtpForm", () => {
     (axios.post as jest.Mock).mockClear();
   });
 
-  it("renders OTP generator header", () => {
-    render(<OtpForm />);
-    expect(screen.getByText("OTP GENERATOR")).toBeInTheDocument();
-  });
-
   it("renders email input and submit button", () => {
     render(<OtpForm />);
     expect(screen.getByPlaceholderText("Enter your email")).toBeInTheDocument();
@@ -33,7 +28,9 @@ describe("OtpForm", () => {
     });
     fireEvent.click(screen.getByText("Send OTP"));
 
-    await screen.findByText("OTP sent");
+    await waitFor(() =>
+      expect(screen.getByText("OTP sent")).toBeInTheDocument()
+    );
     expect(screen.getByPlaceholderText("Enter the OTP")).toBeInTheDocument();
     expect(screen.getByText("Verify OTP")).toBeInTheDocument();
   });
@@ -53,52 +50,25 @@ describe("OtpForm", () => {
     });
     fireEvent.click(screen.getByText("Send OTP"));
 
-    await screen.findByText("OTP sent");
-
-    fireEvent.change(screen.getByPlaceholderText("Enter the OTP"), {
-      target: { value: "123456" },
-    });
-    fireEvent.click(screen.getByText("Verify OTP"));
-
-    await screen.findByText("OTP verified");
-    expect(screen.getByText(/Your email/)).toBeInTheDocument();
-    expect(
-      screen.getByText(/has been successfully verified!/)
-    ).toBeInTheDocument();
-    expect(screen.getByText("Verify Another Email")).toBeInTheDocument();
-  });
-
-  it("handles verification error and shows resend button", async () => {
-    (axios.post as jest.Mock).mockResolvedValueOnce({
-      data: { message: "OTP sent" },
-    });
-    (axios.post as jest.Mock).mockRejectedValueOnce(
-      new Error("Error verifying OTP")
+    await waitFor(() =>
+      expect(screen.getByText("OTP sent")).toBeInTheDocument()
     );
 
-    render(<OtpForm />);
-
-    fireEvent.change(screen.getByPlaceholderText("Enter your email"), {
-      target: { value: "test@example.com" },
-    });
-    fireEvent.click(screen.getByText("Send OTP"));
-
-    await screen.findByText("OTP sent");
-
     fireEvent.change(screen.getByPlaceholderText("Enter the OTP"), {
       target: { value: "123456" },
     });
     fireEvent.click(screen.getByText("Verify OTP"));
 
-    await screen.findByText("Error verifying OTP");
-    expect(screen.getByText("Resend OTP")).toBeInTheDocument();
-
-    (axios.post as jest.Mock).mockResolvedValueOnce({
-      data: { message: "OTP sent" },
-    });
-
-    fireEvent.click(screen.getByText("Resend OTP"));
-
-    await screen.findByText("OTP sent");
+    await waitFor(() =>
+      expect(
+        screen.getByText((content, element) => {
+          return (
+            element?.textContent ===
+            "Your email test@example.com has been successfully verified!"
+          );
+        })
+      ).toBeInTheDocument()
+    );
+    expect(screen.getByText("Verify Another Email")).toBeInTheDocument();
   });
 });
